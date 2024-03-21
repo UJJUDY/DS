@@ -1,0 +1,241 @@
+from google.colab import drive drive.mount('/content/drive')
+ 
+Mounted at /content/drive
+import pandas as pd from sklearn.metrics import mean_absolute_error
+import matplotlib.pyplot as plt plt.style.use('ggplot')
+def make_plot(truth, prediction):
+  plt.plot(truth, color="red", label="truth")   plt.plot(prediction, color="blue", label="predicted")   plt.legend()   plt.grid()   plt.title("Comparing truth and predicted regression values")   plt.tight_layout()   plt.show()
+train = pd.read_csv ('/content/drive/MyDrive/msc_training_dataset.csv') test = pd.read_csv('/content/drive/MyDrive/msc_testing_dataset.csv')
+train.head()
+room bathroom kitchen french_door backyard furnished green_paint solar_po
+ 
+0	3	1	2	1	1	0	1
+1	5	2	2	2	1	0	0
+2	5	2	2	2	1	0	0
+3	1	2	1	2	0	0	0
+4	2	1	2	3	1	1	0
+ 
+test.head()
+room bathroom kitchen french_door backyard furnished green_paint solar_po
+ 
+0	1	1	1	3	0	0	1
+1	5	1	1	2	0	0	0
+2	5	1	1	3	0	0	0
+3	4	2	2	1	0	1	1
+4	5	2	1	1	0	1	1
+ 
+train.describe()
+	room	bathroom	kitchen french_door	backyard	furnished
+ 
+	count	3000.000000	3000.000000	3000.000000	3000.000000	3000.000000	3000.000000
+	mean	2.990000	1.489000	1.522000	1.998333	0.490333	0.488667
+	std	1.424281	0.499962	0.499599	0.813153	0.499990	0.499955
+	min	1.000000	1.000000	1.000000	1.000000	0.000000	0.000000
+	25%	2.000000	1.000000	1.000000	1.000000	0.000000	0.000000
+	50%	3.000000	1.000000	2.000000	2.000000	0.000000	0.000000
+	75%	4.000000	2.000000	2.000000	3.000000	1.000000	1.000000
+	max	5.000000	2.000000	2.000000	3.000000	1.000000	1.000000
+ 
+train.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 3000 entries, 0 to 2999 Data columns (total 12 columns):
+ #   Column        Non-Null Count  Dtype
+---  ------        --------------  -----
+0	room          3000 non-null   int64
+1	bathroom      3000 non-null   int64
+2	kitchen       3000 non-null   int64
+3	french_door   3000 non-null   int64
+4	backyard      3000 non-null   int64
+5	furnished     3000 non-null   int64
+6	green_paint   3000 non-null   int64
+7	solar_power   3000 non-null   int64
+8	woodfloor     3000 non-null   int64
+9	qlm_security  3000 non-null   int64
+10	club_access   3000 non-null   int64 11  price         3000 non-null   int64 dtypes: int64(12) memory usage: 281.4 KB
+train['room'].describe()
+count    3000.000000 mean        2.990000 std         1.424281 min         1.000000 25%         2.000000
+50%         3.000000 75%         4.000000 max         5.000000 Name: room, dtype: float64 #exp.describe()
+test.describe()
+	room	bathroom	kitchen french_door	backyard furnished gree
+ 
+	count	999.000000	999.000000	999.000000	999.000000	999.000000	999.000000	999
+	mean	3.019019	1.491491	1.496496	1.959960	0.510511	0.474474	0
+	std	1.413731	0.500178	0.500238	0.809759	0.500140	0.499598	0
+	min	1.000000	1.000000	1.000000	1.000000	0.000000	0.000000	0
+	25%	2.000000	1.000000	1.000000	1.000000	0.000000	0.000000	0
+	50%	3.000000	1.000000	1.000000	2.000000	1.000000	0.000000	1
+	75%	4.000000	2.000000	2.000000	3.000000	1.000000	1.000000	1
+	max	5.000000	2.000000	2.000000	3.000000	1.000000	1.000000	1
+ 
+train_X = train.drop('price', axis=1) test_X = test.drop('price', axis=1) train_Y = train['price'] test_Y = test['price']
+train_X.head()
+room bathroom kitchen french_door backyard furnished green_paint solar_po
+ 
+0	3	1	2	1	1	0	1
+1	5	2	2	2	1	0	0
+2	5	2	2	2	1	0	0
+3	1	2	1	2	0	0	0
+4	2	1	2	3	1	1	0
+ 
+train_Y
+0	6835
+1	9005
+2	9005
+3	5105
+4	9105         ... 
+2995	4825
+2996	6755
+2997	7565
+2998	9135
+2999	8955
+Name: price, Length: 3000, dtype: int64
+from sklearn.linear_model import LinearRegression reg = LinearRegression().fit(train_X, train_Y)
+reg
+▾LinearRegression
+LinearRegression()
+predicted = reg.predict(test_X)
+predicted
+array([ 5055.,  7645., 11305.,  8845., 11165., 11375., 11735.,  6835.,         7815.,  5895.,  9095.,  8295.,  6695., 11305.,  7205.,  9165.,
+        8775., 12745.,  9745.,  6655.,  9325.,  7785.,  7075.,  4315.,
+        9965.,  6855.,  7335.,  8895.,  6325.,  9695.,  6645., 10305.,        10485.,  8195.,  7565., 10355.,  9475., 11115.,  9765., 12825.,         6295.,  5125.,  9825.,  8895., 11715.,  6205.,  4095., 11475.,
+        9565.,  5535., 11455., 10395.,  4125.,  7735., 13055.,  9595.,
+        6445.,  8365., 10155.,  7835.,  8275., 14305.,  7075.,  8435.,        12625.,  7095., 11435., 10555., 10095.,  5535.,  8235., 12095.,         4215.,  5865.,  9355.,  9245.,  7065., 11625., 10855., 10825.,
+        8785.,  7355., 11865.,  8315., 11805.,  5945.,  8775.,  8275.,
+        7165.,  8245.,  7575., 11925., 11965.,  7975.,  6645., 10795.,        11235.,  8195.,  9355.,  7445.,  7235.,  8935.,  4575.,  9675.,         5735.,  5075., 10645.,  9705.,  8605., 12515.,  8165.,  6105.,
+        9175.,  6705.,  9265.,  9605.,  9925.,  7345.,  9215.,  7785.,
+        8395.,  7535.,  6565.,  8665., 12195., 10195., 10905.,  5785.,
+        5225.,  6095.,  3845.,  6235.,  9975.,  6465., 11025.,  6565.,
+        4975., 11695.,  8105.,  9135., 10605., 10325.,  5505.,  7435.,
+        8895., 11485.,  5995.,  7265.,  5185., 10695., 13005.,  9735.,        10425., 11185.,  8295., 11925.,  7745.,  8005., 10355., 10035.,
+       11995.,  8665., 10825.,  6935.,  9425.,  9695., 12285.,  7405.,
+       11715.,  5595.,  9305.,  8145., 10905.,  5655.,  6645.,  7815.,         8195.,  9665.,  7865., 10445., 11795.,  8305.,  8885.,  8325.,
+        5175.,  9645.,  8895.,  8645., 10135.,  7705.,  5865.,  8405.,
+        5345.,  6275.,  7275.,  7345., 11795.,  9905.,  5715., 11345.,
+        9535.,  7525., 12955.,  5345.,  7995.,  7885., 10225.,  8365.,        10165., 11935., 10685.,  8895.,  8975.,  8135.,  9325., 12165.,         9605.,  6965.,  6075.,  5475., 12635.,  4105.,  5745.,  8745.,
+        8835.,  6165.,  7845.,  6545.,  7785.,  4705., 12865.,  7995.,
+        7435.,  9195.,  6135., 13685.,  9045., 10355.,  8835.,  6835.,
+        5535.,  8005.,  7405.,  8785.,  8765., 11625.,  9135., 10875.,        11295.,  7765.,  9105.,  8315.,  6675.,  5575.,  7395.,  6805.,         9625.,  8055.,  6035.,  6665., 11205.,  9945.,  5275.,  8965.,        11305.,  6985.,  7305., 10705.,  7745., 11145., 11795.,  5455.,         6415.,  9515.,  8435.,  9545.,  8805.,  4205., 10605.,  9005.,
+        2775.,  9705., 12465., 10445.,  4745., 11055., 11905.,  6465.,        10055.,  9375., 10905.,  9195., 11435.,  9475.,  9295., 10105.,         9085.,  5385.,  8945., 10495.,  8855., 11325.,  8545.,  8095.,
+        6525.,  7065.,  9165., 10395.,  8455., 10705.,  9945., 11615.,
+        7455.,  8965.,  8365.,  5865.,  8405.,  8445.,  9675.,  7705.,
+        8055.,  7405.,  9715.,  7555.,  9455.,  6295.,  9455.,  7475.,
+        8265.,  5905.,  7735.,  7755.,  8715.,  5595.,  8285.,  9675.,
+        7345., 11175.,  7875.,  6575., 10245.,  7785.,  4065., 12385.,
+        8205., 12695.,  9025., 10145.,  6875.,  5865., 11655., 11035.,
+        4235.,  7175., 10195.,  6385.,  7225.,  9485., 12495.,  8605.,
+        4835.,  6265.,  6545.,  8165.,  9495.,  8955.,  5535.,  5985.,
+        6895.,  8415., 10175., 11495.,  9425.,  9215.,  8425.,  7865.,
+        9355.,  4575.,  9105.,  4875.,  8335.,  7855.,  6855.,  8685.,
+        7065.,  5745.,  8545.,  9005.,  4565.,  3335.,  7695.,  5915.,
+        9945.,  7365.,  8055.,  7965.,  6375.,  6735.,  8595.,  7935.,
+        7995.,  7265.,  4795.,  9235.,  9215., 10665., 10865.,  8145.,
+        7175.,  7045.,  8585.,  8965.,  5015.,  4845.,  8435., 11655.,
+        7115., 10345.,  5975., 11625.,  8615., 12565., 11555.,  9245.,        10975., 12135., 11625.,  7905., 10195., 11305.,  8815.,  6865.,
+       13325.,  6795., 10015.,  7245., 11295.,  6995.,  5885.,  8135.,         6905.,  5495.,  8395.,  7905.,  7805.,  8855., 10965., 12825.,
+        8245.,  6635.,  7635.,  9955.,  7545.,  8665.,  8145.,  7205.,
+        8865.,  6395.,  8135.,  8185.,  9775.,  9625.,  5145.,  5495.,
+print(reg.score(train_X, train_Y))
+1.0
+print(mean_absolute_error(test_Y, predicted))
+13.000000000000469
+make_plot(test_Y, predicted)
+from sklearn.ensemble  import RandomForestRegressor rf_reg = RandomForestRegressor().fit(train_X, train_Y) rf_predicted = rf_reg.predict(test_X) print(rf_reg.score(train_X, train_Y)) print(mean_absolute_error(test_Y, rf_predicted))
+0.9984692267792926 171.64064064064067
+make_plot(test_Y, rf_predicted)
+ 
+rf_reg.feature_importances_
+array([0.42935469, 0.00467788, 0.01116971, 0.00890796, 0.01458454,
+       0.19706443, 0.00674366, 0.11464701, 0.1776755 , 0.00898077,        0.02619385])
+train.columns
+Index(['room', 'bathroom', 'kitchen', 'french_door', 'backyard', 'furnished',
+       'green_paint', 'solar_power', 'woodfloor', 'qlm_security',
+       'club_access', 'price'],       dtype='object')
+imp_scores = zip(rf_reg.feature_importances_, train.columns) sorted(list(imp_scores), reverse=True)
+[(0.42935469261210407, 'room'),
+ (0.19706442921907974, 'furnished'),
+ (0.17767549879908803, 'woodfloor'),
+ (0.11464700576335861, 'solar_power'),
+ (0.026193854084501318, 'club_access'),
+ (0.014584542416575775, 'backyard'),
+ (0.011169706665401964, 'kitchen'),
+ (0.008980767237437457, 'qlm_security'),
+ (0.008907964125076268, 'french_door'),
+ (0.006743657214754854, 'green_paint'),
+ (0.0046778818626218984, 'bathroom')]
+rf_importances = rf_reg.feature_importances_ rf_reg.feature_names_in_
+ranks_and_features = zip(rf_importances, rf_reg.feature_names_in_) ranks_and_features = sorted(ranks_and_features,reverse=True) for x, y in ranks_and_features:     print(x, y)
+0.42935469261210407 room
+0.19706442921907974 furnished
+0.17767549879908803 woodfloor
+0.11464700576335861 solar_power
+0.026193854084501318 club_access
+0.014584542416575775 backyard
+0.011169706665401964 kitchen
+0.008980767237437457 qlm_security
+0.008907964125076268 french_door
+0.006743657214754854 green_paint
+0.0046778818626218984 bathroom
+ranks_and_features
+[(0.42935469261210407, 'room'),
+ (0.19706442921907974, 'furnished'),
+ (0.17767549879908803, 'woodfloor'),
+ (0.11464700576335861, 'solar_power'),
+ (0.026193854084501318, 'club_access'),
+ (0.014584542416575775, 'backyard'),
+ (0.011169706665401964, 'kitchen'),
+ (0.008980767237437457, 'qlm_security'),
+ (0.008907964125076268, 'french_door'),
+ (0.006743657214754854, 'green_paint'),
+ (0.0046778818626218984, 'bathroom')]
+keys = [k[1] for k in ranks_and_features ] [::-1] keys
+['bathroom',
+ 'green_paint',
+ 'french_door',
+ 'qlm_security',
+ 'kitchen',
+ 'backyard',
+ 'club_access',
+ 'solar_power',
+ 'woodfloor',
+ 'furnished',  'room']
+values = [k[0] for k in ranks_and_features ][::-1] values
+[0.0046778818626218984,
+ 0.006743657214754854,  0.008907964125076268,  0.008980767237437457,  0.011169706665401964,  0.014584542416575775,
+ 0.026193854084501318,
+ 0.11464700576335861,  0.17767549879908803,  0.19706442921907974,  0.42935469261210407]
+plt.barh(keys, values)
+<BarContainer object of 11 artists>
+ 
+import xgboost as xgb
+xgb_reg =  xgb.XGBRegressor().fit(train_X, train_Y) xgb_predicted = xgb_reg.predict(test_X) print("R-sqaured:", xgb_reg.score(train_X, train_Y)) print("Mean Absolute Error:", mean_absolute_error(test_Y, xgb_predicted)) xgb_importances = xgb_reg.feature_importances_
+xgb_ranks_and_features = zip(xgb_importances, rf_reg.feature_names_in_) xgb_ranks_and_features = sorted(xgb_ranks_and_features,reverse=True) print("\nFeature Importances with XGBoost:") for x, y in xgb_ranks_and_features:     print(x, y)
+R-sqaured: 0.9997084329328167
+Mean Absolute Error: 60.142959121230604
+Feature Importances with XGBoost:
+0.29977584 room
+0.241706 woodfloor
+0.2364698 furnished
+0.11214046 solar_power
+0.026595302 club_access 0.019723801 backyard
+0.01696462 qlm_security 0.014970071 kitchen
+0.011910282 french_door
+0.011131189 green_paint
+0.0086126365 bathroom
+make_plot(test_Y, xgb_predicted)
+lin_mae = mean_absolute_error(test_Y, predicted) knn_mae = mean_absolute_error(test_Y, knn_predicted) rf_mae = mean_absolute_error(test_Y, rf_predicted) xgb_mae = mean_absolute_error(test_Y, xgb_predicted) errors = [lin_mae, knn_mae, rf_mae, xgb_mae] labels = ["LinearReg", "KNNReg", "RFReg", "XGBReg"] bars = plt.bar(labels, errors, width=0.4) for bar in bars:
+    yval = int(bar.get_height())     plt.text(bar.get_x(), yval + .005, yval)
+#plt.grid()
+plt.title("MAE for various regression algorithms")
+Text(0.5, 1.0, 'MAE for various regression algorithms')
+ 
+ 
+
+
+
+
+
+
+
+
+
+
